@@ -118,26 +118,27 @@ const App: React.FC = () => {
           <ClockSection now={now} />
           <BellInfo activeIdx={activeIdx} nextIdx={nextIdx} now={now} />
         </div>
+            
+        {/* 🖼 ОСНОВНАЯ СЕТКА (Увеличенная высота и измененные пропорции) */}
+        <div className="w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6 h-[85vh]">
 
-        {/* 🖼 ОСНОВНАЯ СЕТКА (Фиксированная высота для прямоугольных блоков) */}
-        <div className="w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-2 gap-6 h-[480px]">
-
-          {/* 📸 ЛЕВЫЙ БЛОК: ФОТОГАЛЕРЕЯ */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 flex flex-col relative">
-            <div className="absolute top-4 left-4 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm px-3 py-1 rounded-lg text-sm font-bold shadow-sm">
-              📷 Фотогалерея
+          {/* 📸 ЛЕВЫЙ БЛОК: НОВОСТИ (Теперь шире и выше) */}
+          <div className="bg-black rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col relative group">
+            {/* Убрали лишний заголовок "Фотогалерея", так как внутри слайдера есть свой заголовок "НОВОСТИ" */}
+            
+            {/* NewsSlider теперь занимает всё доступное место */}
+            <div className="w-full h-full">
+                <NewsSlider />
             </div>
-            {/* <PhotoGallery /> */}
-            <NewsSlider/>
           </div>
 
-          {/* 📋 ПРАВЫЙ БЛОК: РАСПИСАНИЕ */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 flex flex-col">
+          {/* 📋 ПРАВЫЙ БЛОК: РАСПИСАНИЕ (Чуть уже, но тоже высокий) */}
+          <div className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 flex flex-col">
             
             {/* Заголовок блока */}
-            <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
-              <h3 className="font-bold text-sm flex items-center gap-2">📋 Расписание</h3>
-              <span className="text-[10px] font-black text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-md uppercase">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+              <h3 className="font-bold text-lg flex items-center gap-2">📋 Расписание</h3>
+              <span className="text-xs font-black text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1 rounded-lg uppercase tracking-wide">
                 {selectedClass} • {selectedDayFull}
               </span>
             </div>
@@ -146,13 +147,12 @@ const App: React.FC = () => {
             <div className="flex flex-col flex-1 overflow-hidden">
               <BellTable now={now} />
               
-              {/* ✅ Используем импортированные компоненты вместо инлайн-кнопок */}
               <ClassTabs current={selectedClass} onSelect={handleSelectClass} />
               <DayTabs current={selectedDay} today={todayKey} onSelect={handleSelectDay} />
               <SearchBar value={search} onChange={setSearch} onClear={() => setSearch("")} />
 
               {/* Список уроков */}
-              <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-slate-50/30 dark:bg-slate-900/20">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30 dark:bg-slate-900/20">
                 {search && searchResults.length > 0 && (
                   <div className="px-2 py-1 text-xs text-slate-500 font-bold uppercase tracking-wider">
                     Найдено {searchResults.length}
@@ -166,8 +166,8 @@ const App: React.FC = () => {
                     ))
                   ) : (
                     <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                      <span className="text-2xl mb-2">🔍</span>
-                      <p className="text-sm">Ничего не найдено</p>
+                      <span className="text-4xl mb-4">🔍</span>
+                      <p className="text-base">Ничего не найдено</p>
                     </div>
                   )
                 ) : currentLessons.length > 0 ? (
@@ -176,21 +176,21 @@ const App: React.FC = () => {
                   ))
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                    <span className="text-2xl mb-2">😴</span>
-                    <p className="text-sm font-medium">Нет уроков в этот день</p>
+                    <span className="text-4xl mb-4">😴</span>
+                    <p className="text-base font-medium">Нет уроков в этот день</p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Прогресс-бар (только для сегодняшнего дня) */}
+            {/* Прогресс-бар */}
             {selectedDay === todayKey && currentLessons.length > 0 && (
               <Progress activeIdx={activeIdx} now={now} schedule={currentLessons} />
             )}
-          </div>
         </div>
       </div>
     </div>
+  </div>
   );
 };
 
