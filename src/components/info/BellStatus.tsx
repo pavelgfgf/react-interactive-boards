@@ -1,8 +1,8 @@
 // src/components/BellInfo.tsx
-import {type FC } from 'react';
-import { BELL_SCHEDULE } from '../data/schedule';
-import type { BellSlot } from '../data/types';
-import { parseTime } from '../utils/time';
+import { type FC } from 'react';
+import { BELL_SCHEDULE } from '../../data/data';
+import type { BellSlot } from '../../data/types';
+import { parseTime } from '../../utils/time';
 
 interface BellInfoProps {
   activeIdx: number;

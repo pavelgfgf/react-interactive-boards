@@ -5,13 +5,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { Lesson, SearchMatchItem, ThemeType } from './data/types';
 
 // Data
-import { BELL_SCHEDULE, SCHEDULE_DATA } from './data/schedule';
+import { BELL_SCHEDULE, SCHEDULE_DATA } from './data/data';
 
 // Utils
 import { getDayFull, getDayKey, parseTime } from './utils/time';
 
 // Hooks
-import { useTime } from './hook/useTime';
+import { useTime } from './hooks/useTime';
 
 // Components
 import {

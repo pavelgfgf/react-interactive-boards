@@ -1,8 +1,8 @@
 // src/components/Progress.tsx
 import { type FC } from 'react';
-import type { BellSlot, Lesson } from '../data/types';
-import { BELL_SCHEDULE } from '../data/schedule';
-import { parseTime } from '../utils/time';
+import { BELL_SCHEDULE } from '../../data/data';
+import type { BellSlot, Lesson } from '../../data/types';
+import { parseTime } from '../../utils/time';
 
 interface ProgressProps {
   activeIdx: number;

@@ -1,10 +1,11 @@
 // src/components/index.ts
-export { ClockSection } from './ClockSection';
-export { BellInfo } from './BellInfo';
-export { PhotoGallery } from './PhotoGallery';
-export { ClassTabs } from './ClassTabs';
-export { DayTabs } from './DayTabs';
-export { SearchBar } from './SearchBar';
-export { BellTable } from './BellTable';
-export { LessonItem } from './LessonItem';
-export { Progress } from './Progress';
+export { PhotoGallery } from './gallery/PhotoGallery';
+export { BellInfo } from './info/BellStatus';
+export { ClockSection } from './info/ClockSection';
+export { BellTable } from './schedule/BellTable';
+export { ClassTabs } from './schedule/ClassTabs';
+export { DayTabs } from './schedule/DayTabs';
+export { LessonItem } from './schedule/LessonItem';
+export { Progress } from './schedule/Progress';
+export { SearchBar } from './schedule/SearchBar';
+

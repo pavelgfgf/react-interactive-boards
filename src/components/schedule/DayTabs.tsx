@@ -1,6 +1,6 @@
 // src/components/DayTabs.tsx
-import { type FC} from 'react';
-import { DAYS_MAP } from '../data/schedule';
+import { type FC } from 'react';
+import { DAYS_MAP } from '../../data/data';
 
 interface DayTabsProps {
   current: string;

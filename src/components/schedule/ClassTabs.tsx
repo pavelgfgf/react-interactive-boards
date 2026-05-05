@@ -1,6 +1,6 @@
 // src/components/ClassTabs.tsx
 import { type FC } from 'react';
-import { SCHEDULE_DATA } from '../data/schedule';
+import { SCHEDULE_DATA } from '../../data/data';
 
 interface ClassTabsProps {
   current: string;

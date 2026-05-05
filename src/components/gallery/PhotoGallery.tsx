@@ -1,7 +1,7 @@
 // src/components/PhotoGallery.tsx
-import  { type FC, useState, useCallback, useEffect } from 'react';
-import type { PhotoItem } from '../data/types';
-import { PHOTO_DATA } from '../data/schedule';
+import { type FC, useCallback, useEffect, useState } from 'react';
+import { PHOTO_DATA } from '../../data/data';
+import type { PhotoItem } from '../../data/types';
 
 export const PhotoGallery: FC = () => {
   const [currentIdx, setCurrentIdx] = useState(0);
