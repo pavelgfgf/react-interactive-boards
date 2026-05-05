@@ -21,10 +21,10 @@ import {
   ClockSection,
   DayTabs,
   LessonItem,
-  PhotoGallery,
   Progress,
   SearchBar,
 } from './components';
+import { NewsSlider } from './components/News/NewsSlider';
 
 const App: React.FC = () => {
   const [theme, setTheme] = useState<ThemeType>('light');
@@ -127,7 +127,8 @@ const App: React.FC = () => {
             <div className="absolute top-4 left-4 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm px-3 py-1 rounded-lg text-sm font-bold shadow-sm">
               📷 Фотогалерея
             </div>
-            <PhotoGallery />
+            {/* <PhotoGallery /> */}
+            <NewsSlider/>
           </div>
 
           {/* 📋 ПРАВЫЙ БЛОК: РАСПИСАНИЕ */}
