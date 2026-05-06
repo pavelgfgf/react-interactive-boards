@@ -1,29 +1,37 @@
 // src/components/BellTable.tsx
 import { type FC } from 'react';
-import { BELL_SCHEDULE } from '../../data/data';
-import type { BellSlot } from '../../data/types';
+// import type { BellSlot } from '../../data/types'; // Можно переиспользовать тип или создать новый
 import { parseTime } from '../../utils/time';
+
+// Определяем тип для элемента расписания, если он отличается от BellSlot
+// Для простоты предположим, что структура похожа: { num: number, start: string, end: string }
+interface BellScheduleItem {
+  num: number;
+  start: string;
+  end: string;
+}
 
 interface BellTableProps {
   now: Date;
+  schedule: BellScheduleItem[]; // <-- Принимаем расписание как пропс
 }
 
-export const BellTable: FC<BellTableProps> = ({ now }) => {
+export const BellTable: FC<BellTableProps> = ({ now, schedule }) => {
   const curMin = now.getHours() * 60 + now.getMinutes();
 
   let activeNum = -1;
-  for (let i = 0; i < BELL_SCHEDULE.length; i++) {
-    const s = parseTime(BELL_SCHEDULE[i].start);
-    const e = parseTime(BELL_SCHEDULE[i].end);
-    if (curMin >= s && curMin < e) { activeNum = i + 1; break; }
+  for (let i = 0; i < schedule.length; i++) {
+    const s = parseTime(schedule[i].start);
+    const e = parseTime(schedule[i].end);
+    if (curMin >= s && curMin < e) { activeNum = schedule[i].num; break; }
   }
 
   return (
     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50">
       <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Расписание звонков</div>
       <div className="grid grid-cols-9 gap-1 text-center">
-        {BELL_SCHEDULE.map((b: BellSlot, i: number) => {
-          const isNow = activeNum === i + 1;
+        {schedule.map((b: BellScheduleItem, i: number) => {
+          const isNow = activeNum === b.num;
           const isPast = parseTime(b.end) < curMin;
           return (
             <div key={i} className="flex flex-col items-center">

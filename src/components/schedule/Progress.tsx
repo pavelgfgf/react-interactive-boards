@@ -1,29 +1,39 @@
 // src/components/Progress.tsx
 import { type FC } from 'react';
-import { BELL_SCHEDULE } from '../../data/data';
-import type { BellSlot, Lesson } from '../../data/types';
+import type { Lesson } from '../../data/types';
 import { parseTime } from '../../utils/time';
+
+interface BellScheduleItem {
+  num: number;
+  start: string;
+  end: string;
+}
 
 interface ProgressProps {
   activeIdx: number;
   now: Date;
-  schedule: Lesson[];
+  schedule: Lesson[]; // Это расписание уроков (предметы)
+  bellSchedule: BellScheduleItem[]; // <-- Добавляем расписание звонков
 }
 
-export const Progress: FC<ProgressProps> = ({ activeIdx, now, schedule }) => {
+export const Progress: FC<ProgressProps> = ({ activeIdx, now, schedule, bellSchedule }) => {
   const curMin = now.getHours() * 60 + now.getMinutes();
 
-  if (activeIdx !== -1) {
-    const bell: BellSlot = BELL_SCHEDULE[activeIdx];
+  if (activeIdx !== -1 && bellSchedule[activeIdx]) {
+    const bell = bellSchedule[activeIdx];
     const s = parseTime(bell.start);
     const e = parseTime(bell.end);
-    const pct = Math.min(100, ((curMin - s) / (e - s)) * 100);
+    
+    // Избегаем деления на ноль, если начало и конец совпадают
+    const duration = e - s;
+    const elapsed = curMin - s;
+    const pct = duration > 0 ? Math.min(100, (elapsed / duration) * 100) : 0;
 
     return (
       <div className="p-4 border-t border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800">
         <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-1.5">
           <span>{schedule[activeIdx]?.subject || 'Урок'}</span>
-          <span>{curMin - s} / {e - s} мин</span>
+          <span>{elapsed} / {duration} мин</span>
         </div>
         <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
           <div className="h-full bg-blue-500 rounded-full transition-all duration-1000" style={{ width: `${pct}%` }}></div>
@@ -32,9 +42,10 @@ export const Progress: FC<ProgressProps> = ({ activeIdx, now, schedule }) => {
     );
   }
 
-  const nextIdx = BELL_SCHEDULE.findIndex((b: BellSlot) => parseTime(b.start) > curMin);
+  // Логика для перемены
+  const nextIdx = bellSchedule.findIndex((b: BellScheduleItem) => parseTime(b.start) > curMin);
   if (activeIdx === -1 && now.getHours() >= 8 && nextIdx !== -1) {
-    const diff = parseTime(BELL_SCHEDULE[nextIdx].start) - curMin;
+    const diff = parseTime(bellSchedule[nextIdx].start) - curMin;
     return (
       <div className="p-4 border-t border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800">
         <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-1.5">
@@ -51,4 +62,4 @@ export const Progress: FC<ProgressProps> = ({ activeIdx, now, schedule }) => {
   return <div className="h-12"></div>;
 };
 
-export default Progress
+export default Progress;

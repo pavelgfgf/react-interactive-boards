@@ -4,14 +4,15 @@ import React, { useCallback, useMemo, useState } from 'react';
 // Types
 import type { Lesson, SearchMatchItem, ThemeType } from './data/types';
 
-// Data
-import { BELL_SCHEDULE, SCHEDULE_DATA } from './data/data';
+// Data (SCHEDULE_DATA пока оставляем, если расписание уроков тоже не в PB)
+import { SCHEDULE_DATA } from './data/data';
 
 // Utils
 import { getDayFull, getDayKey, parseTime } from './utils/time';
 
 // Hooks
 import { useTime } from './hooks/useTime';
+import { useBellSchedule } from './hooks/useBellSchedule'; // <-- Импортируем новый хук
 
 // Components
 import {
@@ -36,42 +37,60 @@ const App: React.FC = () => {
   const curMin = now.getHours() * 60 + now.getMinutes();
   const todayKey = getDayKey(now);
 
-  // Вычисление активного и следующего урока
+  // <-- ЗАГРУЖАЕМ РАСПИСАНИЕ ЗВОНКОВ ИЗ POCKETBASE
+  const { schedule: bellSchedule, loading: isScheduleLoading, error: scheduleError } = useBellSchedule();
+
+  // Вычисление активного и следующего урока ТЕПЕРЬ ЗАВИСИТ ОТ bellSchedule
   const { activeIdx, nextIdx } = useMemo(() => {
     let active = -1;
     let next = -1;
-    for (let i = 0; i < BELL_SCHEDULE.length; i++) {
-      const s = parseTime(BELL_SCHEDULE[i].start);
-      const e = parseTime(BELL_SCHEDULE[i].end);
-      if (curMin >= s && curMin < e) { active = i; break; }
-      if (curMin < s && next === -1) next = i;
+    
+    // Если расписание еще не загрузилось или пусто, ничего не делаем
+    if (!bellSchedule || bellSchedule.length === 0) {
+        return { activeIdx: -1, nextIdx: -1 };
+    }
+
+    for (let i = 0; i < bellSchedule.length; i++) {
+      const s = parseTime(bellSchedule[i].start);
+      const e = parseTime(bellSchedule[i].end);
+      if (curMin >= s && curMin < e) { 
+          active = i; 
+          break; 
+      }
+      if (curMin < s && next === -1) {
+          next = i;
+      }
     }
     return { activeIdx: active, nextIdx: next };
-  }, [curMin]);
+  }, [curMin, bellSchedule]); // <-- Добавляем bellSchedule в зависимости
 
   // Глобальный поиск по всем классам и дням
   const searchResults: SearchMatchItem[] = useMemo(() => {
     if (!search) return [];
     const q = search.toLowerCase();
     const results: SearchMatchItem[] = [];
+    
+    // Используем bellSchedule для получения времени начала/конца в поиске
     Object.entries(SCHEDULE_DATA).forEach(([group, days]) => {
       Object.entries(days).forEach(([day, lessons]) => {
         lessons.forEach((lesson, idx) => {
           if (lesson.teacher.toLowerCase().includes(q) || lesson.subject.toLowerCase().includes(q)) {
+            // Берем время из нашего динамического расписания, если индекс существует
+            const bell = bellSchedule[idx];
             results.push({
               ...lesson,
               group,
               day,
               num: idx + 1,
-              start: BELL_SCHEDULE[idx].start,
-              end: BELL_SCHEDULE[idx].end,
+              start: bell ? bell.start : '--:--',
+              end: bell ? bell.end : '--:--',
             });
           }
         });
       });
     });
     return results;
-  }, [search]);
+  }, [search, bellSchedule]); // <-- Добавляем bellSchedule в зависимости
 
   const currentLessons: Lesson[] = SCHEDULE_DATA[selectedClass]?.[selectedDay] || [];
 
@@ -79,16 +98,29 @@ const App: React.FC = () => {
     if (selectedDay === todayKey) {
       if (activeIdx === index) return 'active';
       if (nextIdx === index) return 'next';
-      if (parseTime(BELL_SCHEDULE[index].end) < curMin) return 'past';
+      
+      // Проверяем, закончился ли урок, используя динамическое расписание
+      if (bellSchedule[index] && parseTime(bellSchedule[index].end) < curMin) {
+          return 'past';
+      }
     }
     return 'normal';
-  }, [selectedDay, todayKey, activeIdx, nextIdx, curMin]);
+  }, [selectedDay, todayKey, activeIdx, nextIdx, curMin, bellSchedule]); // <-- Добавляем bellSchedule в зависимости
 
   const toggleTheme = useCallback(() => setTheme(prev => prev === 'light' ? 'dark' : 'light'), []);
   const handleSelectClass = useCallback((cls: string) => { setSelectedClass(cls); setSearch(""); }, []);
   const handleSelectDay = useCallback((day: string) => { setSelectedDay(day); setSearch(""); }, []);
 
   const selectedDayFull = getDayFull(selectedDay);
+
+  // Показываем загрузку, пока не получим расписание звонков
+  if (isScheduleLoading) {
+      return <div className="min-h-screen flex items-center justify-center">Загрузка расписания...</div>;
+  }
+
+  if (scheduleError) {
+      return <div className="min-h-screen flex items-center justify-center text-red-500">{scheduleError}</div>;
+  }
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
@@ -116,23 +148,22 @@ const App: React.FC = () => {
         {/*  ЧАСЫ И ИНФО О ЗВОНКЕ */}
         <div className="w-full max-w-[1200px] flex flex-col items-center mb-6">
           <ClockSection now={now} />
-          <BellInfo activeIdx={activeIdx} nextIdx={nextIdx} now={now} />
+          {/* Передаем bellSchedule в BellInfo, если он его использует напрямую, 
+              но сейчас он получает activeIdx/nextIdx, которые уже вычислены на основе bellSchedule */}
+          <BellInfo activeIdx={activeIdx} nextIdx={nextIdx} now={now} schedule={bellSchedule} />
         </div>
             
-        {/* 🖼 ОСНОВНАЯ СЕТКА (Увеличенная высота и измененные пропорции) */}
+        {/* 🖼 ОСНОВНАЯ СЕТКА */}
         <div className="w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6 h-[85vh]">
 
-          {/* 📸 ЛЕВЫЙ БЛОК: НОВОСТИ (Теперь шире и выше) */}
+          {/* 📸 ЛЕВЫЙ БЛОК: НОВОСТИ */}
           <div className="bg-black rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col relative group">
-            {/* Убрали лишний заголовок "Фотогалерея", так как внутри слайдера есть свой заголовок "НОВОСТИ" */}
-            
-            {/* NewsSlider теперь занимает всё доступное место */}
             <div className="w-full h-full">
                 <NewsSlider />
             </div>
           </div>
 
-          {/* 📋 ПРАВЫЙ БЛОК: РАСПИСАНИЕ (Чуть уже, но тоже высокий) */}
+          {/* 📋 ПРАВЫЙ БЛОК: РАСПИСАНИЕ */}
           <div className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 flex flex-col">
             
             {/* Заголовок блока */}
@@ -145,7 +176,8 @@ const App: React.FC = () => {
 
             {/* Контент с прокруткой внутри блока */}
             <div className="flex flex-col flex-1 overflow-hidden">
-              <BellTable now={now} />
+              {/* Передаем bellSchedule в BellTable */}
+              <BellTable now={now} schedule={bellSchedule} />
               
               <ClassTabs current={selectedClass} onSelect={handleSelectClass} />
               <DayTabs current={selectedDay} today={todayKey} onSelect={handleSelectDay} />
@@ -184,8 +216,9 @@ const App: React.FC = () => {
             </div>
 
             {/* Прогресс-бар */}
+            {/* Передаем bellSchedule в Progress */}
             {selectedDay === todayKey && currentLessons.length > 0 && (
-              <Progress activeIdx={activeIdx} now={now} schedule={currentLessons} />
+              <Progress activeIdx={activeIdx} now={now} schedule={currentLessons} bellSchedule={bellSchedule} />
             )}
         </div>
       </div>
