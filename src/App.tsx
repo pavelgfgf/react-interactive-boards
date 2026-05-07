@@ -4,6 +4,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 // Types
 import type { Lesson, SearchMatchItem, ThemeType } from './data/types';
 
+
 // Data (SCHEDULE_DATA пока оставляем, если расписание уроков тоже не в PB)
 import { SCHEDULE_DATA } from './data/data';
 
@@ -11,8 +12,8 @@ import { SCHEDULE_DATA } from './data/data';
 import { getDayFull, getDayKey, parseTime } from './utils/time';
 
 // Hooks
-import { useTime } from './hooks/useTime';
 import { useBellSchedule } from './hooks/useBellSchedule'; // <-- Импортируем новый хук
+import { useTime } from './hooks/useTime';
 
 // Components
 import {
@@ -26,6 +27,7 @@ import {
   SearchBar,
 } from './components';
 import { NewsSlider } from './components/News/NewsSlider';
+import { useDaysOfWeek } from './hooks/useDayOfWeek';
 
 const App: React.FC = () => {
   const [theme, setTheme] = useState<ThemeType>('light');
@@ -36,6 +38,7 @@ const App: React.FC = () => {
   const now = useTime();
   const curMin = now.getHours() * 60 + now.getMinutes();
   const todayKey = getDayKey(now);
+  const { days: daysOfWeek } = useDaysOfWeek();
 
   // <-- ЗАГРУЖАЕМ РАСПИСАНИЕ ЗВОНКОВ ИЗ POCKETBASE
   const { schedule: bellSchedule, loading: isScheduleLoading, error: scheduleError } = useBellSchedule();
@@ -180,7 +183,7 @@ const App: React.FC = () => {
               <BellTable now={now} schedule={bellSchedule} />
               
               <ClassTabs current={selectedClass} onSelect={handleSelectClass} />
-              <DayTabs current={selectedDay} today={todayKey} onSelect={handleSelectDay} />
+              <DayTabs current={selectedDay} today={todayKey} onSelect={handleSelectDay} days={daysOfWeek} /> 
               <SearchBar value={search} onChange={setSearch} onClear={() => setSearch("")} />
 
               {/* Список уроков */}
