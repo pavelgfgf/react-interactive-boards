@@ -1,21 +1,14 @@
 // src/App.tsx
 import React, { useCallback, useMemo, useState } from 'react';
 
-// Types
 import type { Lesson, SearchMatchItem, ThemeType } from './data/types';
-
-
-// Data (SCHEDULE_DATA пока оставляем, если расписание уроков тоже не в PB)
-import { SCHEDULE_DATA } from './data/data';
-
-// Utils
+import { SCHEDULE_DATA, BELL_SCHEDULE } from './data/data';
 import { getDayFull, getDayKey, parseTime } from './utils/time';
 
-// Hooks
-import { useBellSchedule } from './hooks/useBellSchedule'; // <-- Импортируем новый хук
+import { useBellSchedule } from './hooks/useBellSchedule';
 import { useTime } from './hooks/useTime';
+import { useDaysOfWeek } from './hooks/useDayOfWeek';
 
-// Components
 import {
   BellInfo,
   BellTable,
@@ -26,29 +19,28 @@ import {
   Progress,
   SearchBar,
 } from './components';
+
 import { NewsSlider } from './components/News/NewsSlider';
-import { useDaysOfWeek } from './hooks/useDayOfWeek';
 
 const App: React.FC = () => {
   const [theme, setTheme] = useState<ThemeType>('light');
   const [selectedClass, setSelectedClass] = useState<string>("11А");
   const [selectedDay, setSelectedDay] = useState<string>(getDayKey(new Date()));
   const [search, setSearch] = useState<string>("");
+  const [isScheduleFullscreen, setIsScheduleFullscreen] = useState(false);
 
   const now = useTime();
   const curMin = now.getHours() * 60 + now.getMinutes();
   const todayKey = getDayKey(now);
   const { days: daysOfWeek } = useDaysOfWeek();
 
-  // <-- ЗАГРУЖАЕМ РАСПИСАНИЕ ЗВОНКОВ ИЗ POCKETBASE
-  const { schedule: bellSchedule, loading: isScheduleLoading, error: scheduleError } = useBellSchedule();
+  const { schedule: bellSchedulePB, loading: isScheduleLoading, error: scheduleError } = useBellSchedule();
+  const bellSchedule = bellSchedulePB.length > 0 ? bellSchedulePB : BELL_SCHEDULE;
 
-  // Вычисление активного и следующего урока ТЕПЕРЬ ЗАВИСИТ ОТ bellSchedule
   const { activeIdx, nextIdx } = useMemo(() => {
     let active = -1;
     let next = -1;
-    
-    // Если расписание еще не загрузилось или пусто, ничего не делаем
+
     if (!bellSchedule || bellSchedule.length === 0) {
         return { activeIdx: -1, nextIdx: -1 };
     }
@@ -65,20 +57,17 @@ const App: React.FC = () => {
       }
     }
     return { activeIdx: active, nextIdx: next };
-  }, [curMin, bellSchedule]); // <-- Добавляем bellSchedule в зависимости
+  }, [curMin, bellSchedule]);
 
-  // Глобальный поиск по всем классам и дням
   const searchResults: SearchMatchItem[] = useMemo(() => {
     if (!search) return [];
     const q = search.toLowerCase();
     const results: SearchMatchItem[] = [];
     
-    // Используем bellSchedule для получения времени начала/конца в поиске
     Object.entries(SCHEDULE_DATA).forEach(([group, days]) => {
       Object.entries(days).forEach(([day, lessons]) => {
         lessons.forEach((lesson, idx) => {
           if (lesson.teacher.toLowerCase().includes(q) || lesson.subject.toLowerCase().includes(q)) {
-            // Берем время из нашего динамического расписания, если индекс существует
             const bell = bellSchedule[idx];
             results.push({
               ...lesson,
@@ -93,7 +82,7 @@ const App: React.FC = () => {
       });
     });
     return results;
-  }, [search, bellSchedule]); // <-- Добавляем bellSchedule в зависимости
+  }, [search, bellSchedule]);
 
   const currentLessons: Lesson[] = SCHEDULE_DATA[selectedClass]?.[selectedDay] || [];
 
@@ -102,21 +91,20 @@ const App: React.FC = () => {
       if (activeIdx === index) return 'active';
       if (nextIdx === index) return 'next';
       
-      // Проверяем, закончился ли урок, используя динамическое расписание
       if (bellSchedule[index] && parseTime(bellSchedule[index].end) < curMin) {
           return 'past';
       }
     }
     return 'normal';
-  }, [selectedDay, todayKey, activeIdx, nextIdx, curMin, bellSchedule]); // <-- Добавляем bellSchedule в зависимости
+  }, [selectedDay, todayKey, activeIdx, nextIdx, curMin, bellSchedule]);
 
   const toggleTheme = useCallback(() => setTheme(prev => prev === 'light' ? 'dark' : 'light'), []);
   const handleSelectClass = useCallback((cls: string) => { setSelectedClass(cls); setSearch(""); }, []);
   const handleSelectDay = useCallback((day: string) => { setSelectedDay(day); setSearch(""); }, []);
+  const toggleScheduleFullscreen = useCallback(() => setIsScheduleFullscreen(prev => !prev), []);
 
   const selectedDayFull = getDayFull(selectedDay);
 
-  // Показываем загрузку, пока не получим расписание звонков
   if (isScheduleLoading) {
       return <div className="min-h-screen flex items-center justify-center">Загрузка расписания...</div>;
   }
@@ -127,106 +115,151 @@ const App: React.FC = () => {
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col items-center py-6 px-4 font-sans transition-colors duration-300">
+      {/* УБРАЛ px-2, добавил px-0 для полной ширины */}
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col items-center py-4 font-sans transition-colors duration-300">
 
-        {/* 🔝 HEADER */}
-       <header className="w-full px-8 lg:px-12 flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-blue-500/30">
-      🎓
-    </div>
-    <div>
-      <h1 className="text-xl font-black tracking-tight leading-tight">ГАПОУ КК "Ленинградский социально-педагогический колледж"</h1>
-      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Интерактивная панель</p>
-    </div>
-  </div>
-  <button
-    onClick={toggleTheme}
-    className="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-lg hover:scale-105 transition-all shadow-sm"
-  >
-    {theme === 'light' ? '🌙' : '☀️'}
-  </button>
-</header>
-
-        {/*  ЧАСЫ И ИНФО О ЗВОНКЕ */}
-        <div className="w-full max-w-[1200px] flex flex-col items-center mb-6">
-          <ClockSection now={now} />
-          {/* Передаем bellSchedule в BellInfo, если он его использует напрямую, 
-              но сейчас он получает activeIdx/nextIdx, которые уже вычислены на основе bellSchedule */}
-          <BellInfo activeIdx={activeIdx} nextIdx={nextIdx} now={now} schedule={bellSchedule} />
-        </div>
-            
-        {/* 🖼 ОСНОВНАЯ СЕТКА */}
-        <div className="w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6 h-[85vh]">
-
-          {/* 📸 ЛЕВЫЙ БЛОК: НОВОСТИ */}
-          <div className="bg-black rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col relative group">
-            <div className="w-full h-full">
-                <NewsSlider />
+        {/* 🔝 HEADER (убрал max-w и px, теперь на всю ширину) */}
+        <header className="w-full px-8 flex justify-between items-center mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xl shadow-lg shadow-blue-500/30">
+              
+            </div>
+            <div>
+              <h1 className="text-lg font-black tracking-tight leading-tight">ГАПОУ КК "Ленинградский социально-педагогический колледж"</h1>
+              <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Интерактивная панель</p>
             </div>
           </div>
+          <button
+            onClick={toggleTheme}
+            className="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-sm hover:scale-105 transition-all shadow-sm"
+          >
+            {theme === 'light' ? '🌙' : '️'}
+          </button>
+        </header>
 
-          {/* 📋 ПРАВЫЙ БЛОК: РАСПИСАНИЕ */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 flex flex-col">
-            
-            {/* Заголовок блока */}
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
-              <h3 className="font-bold text-lg flex items-center gap-2">📋 Расписание</h3>
-              <span className="text-xs font-black text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1 rounded-lg uppercase tracking-wide">
-                {selectedClass} • {selectedDayFull}
-              </span>
-            </div>
-
-            {/* Контент с прокруткой внутри блока */}
-            <div className="flex flex-col flex-1 overflow-hidden">
-              {/* Передаем bellSchedule в BellTable */}
-              <BellTable now={now} schedule={bellSchedule} />
-              
-              <ClassTabs current={selectedClass} onSelect={handleSelectClass} />
-              <DayTabs current={selectedDay} today={todayKey} onSelect={handleSelectDay} days={daysOfWeek} /> 
-              <SearchBar value={search} onChange={setSearch} onClear={() => setSearch("")} />
-
-              {/* Список уроков */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30 dark:bg-slate-900/20">
-                {search && searchResults.length > 0 && (
-                  <div className="px-2 py-1 text-xs text-slate-500 font-bold uppercase tracking-wider">
-                    Найдено {searchResults.length}
-                  </div>
-                )}
-
-                {search ? (
-                  searchResults.length > 0 ? (
-                    searchResults.map((item, i) => (
-                      <LessonItem key={i} num={item.num} item={item} searchMatch={true} clsName={`${item.group} • ${item.day}`} state="normal" />
-                    ))
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                      <span className="text-4xl mb-4">🔍</span>
-                      <p className="text-base">Ничего не найдено</p>
-                    </div>
-                  )
-                ) : currentLessons.length > 0 ? (
-                  currentLessons.map((item, i) => (
-                    <LessonItem key={i} num={i + 1} item={item} state={getLessonState(i)} />
-                  ))
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                    <span className="text-4xl mb-4">😴</span>
-                    <p className="text-base font-medium">Нет уроков в этот день</p>
-                  </div>
-                )}
+        {/* 📐 ОСНОВНОЙ КОНТЕНТ (убрал max-w, оставил px-6 для небольших отступов от края экрана) */}
+        {!isScheduleFullscreen ? (
+          <div className="w-full px-6 flex flex-col lg:flex-row gap-6">
+            {/* 🕐 ЛЕВАЯ КОЛОНКА: ЧАСЫ + BellInfo */}
+            <div className="w-full lg:w-[35%] flex flex-col items-center">
+              <div className="w-full max-w-[500px]">
+                <ClockSection now={now} />
+                <BellInfo activeIdx={activeIdx} nextIdx={nextIdx} now={now} schedule={bellSchedule} />
               </div>
             </div>
 
-            {/* Прогресс-бар */}
-            {/* Передаем bellSchedule в Progress */}
-            {selectedDay === todayKey && currentLessons.length > 0 && (
-              <Progress activeIdx={activeIdx} now={now} schedule={currentLessons} bellSchedule={bellSchedule} />
-            )}
-        </div>
+            {/* 📋 ПРАВАЯ КОЛОНКА: РАСПИСАНИЕ */}
+            <div className="w-full lg:w-[65%] bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg border border-slate-100 dark:border-slate-700 flex flex-col relative">
+              {/* Кнопка полноэкранного режима */}
+              <div className="absolute top-3 right-3 z-10">
+                <button
+                  onClick={toggleScheduleFullscreen}
+                  className="w-7 h-7 rounded bg-white/80 dark:bg-slate-700/80 border border-slate-300 dark:border-slate-600 flex items-center justify-center text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all shadow-sm"
+                  title="Развернуть расписание"
+                >
+                  📐
+                </button>
+              </div>
+
+              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50 pl-4 pr-10">
+                <h3 className="font-bold text-base flex items-center gap-1">📋 Расписание</h3>
+                <span className="text-[10px] font-black text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded uppercase tracking-wide">
+                  {selectedClass} • {selectedDayFull}
+                </span>
+              </div>
+
+              <div className="flex flex-col">
+                <BellTable now={now} schedule={bellSchedule} />
+                <ClassTabs current={selectedClass} onSelect={handleSelectClass} />
+                <DayTabs current={selectedDay} today={todayKey} onSelect={handleSelectDay} days={daysOfWeek} />
+                <SearchBar value={search} onChange={setSearch} onClear={() => setSearch("")} />
+              </div>
+
+              {selectedDay === todayKey && currentLessons.length > 0 && (
+                <Progress activeIdx={activeIdx} now={now} schedule={currentLessons} bellSchedule={bellSchedule} />
+              )}
+            </div>
+          </div>
+        ) : (
+          // 📋 ПОЛНОЭКРАННОЕ РАСПИСАНИЕ
+          <div className="fixed inset-0 z-50 bg-white dark:bg-slate-900 flex flex-col">
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+              <h2 className="font-bold text-base flex items-center gap-1">📋 Расписание</h2>
+              <button
+                onClick={toggleScheduleFullscreen}
+                className="w-7 h-7 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs hover:scale-105 transition-all shadow-sm"
+                title="Свернуть"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto p-4">
+              <div className="max-w-4xl mx-auto bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg border border-slate-100 dark:border-slate-700 flex flex-col">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                  <h3 className="font-bold text-base flex items-center gap-1">📋 Расписание</h3>
+                  <span className="text-[10px] font-black text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded uppercase tracking-wide">
+                    {selectedClass} • {selectedDayFull}
+                  </span>
+                </div>
+
+                <div className="flex flex-col flex-1 overflow-hidden">
+                  <BellTable now={now} schedule={bellSchedule} />
+                  <ClassTabs current={selectedClass} onSelect={handleSelectClass} />
+                  <DayTabs current={selectedDay} today={todayKey} onSelect={handleSelectDay} days={daysOfWeek} />
+                  <SearchBar value={search} onChange={setSearch} onClear={() => setSearch("")} />
+
+                  {search && searchResults.length > 0 && (
+                    <div className="px-3 py-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                      Найдено {searchResults.length}
+                    </div>
+                  )}
+
+                  <div className="flex-1 overflow-y-auto p-3 bg-slate-50/30 dark:bg-slate-900/20 space-y-2">
+                    {search ? (
+                      searchResults.length > 0 ? (
+                        searchResults.map((item, i) => (
+                          <LessonItem key={i} num={item.num} item={item} searchMatch={true} clsName={`${item.group} • ${item.day}`} state="normal" />
+                        ))
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-full text-slate-400 text-xs">
+                          <span>🔍</span>
+                          <span>Ничего не найдено</span>
+                        </div>
+                      )
+                    ) : currentLessons.length > 0 ? (
+                      currentLessons.map((item, i) => (
+                        <LessonItem key={i} num={i + 1} item={item} state={getLessonState(i)} />
+                      ))
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-slate-400 text-xs">
+                        <span>😴</span>
+                        <span>Нет уроков в этот день</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {selectedDay === todayKey && currentLessons.length > 0 && (
+                  <Progress activeIdx={activeIdx} now={now} schedule={currentLessons} bellSchedule={bellSchedule} />
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 📰 БЛОК НОВОСТЕЙ (убрал px-4, чтобы был на всю ширину) */}
+        {!isScheduleFullscreen && (
+          <div className="w-full mt-6">
+            <div className="bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col relative group">
+              <div className="w-full h-[700px]">
+                <NewsSlider />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
-  </div>
   );
 };
 

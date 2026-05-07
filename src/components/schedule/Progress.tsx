@@ -58,8 +58,6 @@ export const Progress: FC<ProgressProps> = ({ activeIdx, now, schedule, bellSche
       </div>
     );
   }
-
-  return <div className="h-12"></div>;
 };
 
 export default Progress;
