@@ -115,14 +115,13 @@ const App: React.FC = () => {
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
-      {/* УБРАЛ px-2, добавил px-0 для полной ширины */}
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col items-center py-4 font-sans transition-colors duration-300">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col items-center py-4 px-2 font-sans transition-colors duration-300">
 
-        {/* 🔝 HEADER (убрал max-w и px, теперь на всю ширину) */}
-        <header className="w-full px-8 flex justify-between items-center mb-4">
+        {/* 🔝 HEADER */}
+        <header className="w-full max-w-[1600px] px-4 lg:px-6 flex justify-between items-center mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xl shadow-lg shadow-blue-500/30">
-              
+              🎓
             </div>
             <div>
               <h1 className="text-lg font-black tracking-tight leading-tight">ГАПОУ КК "Ленинградский социально-педагогический колледж"</h1>
@@ -133,13 +132,13 @@ const App: React.FC = () => {
             onClick={toggleTheme}
             className="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-sm hover:scale-105 transition-all shadow-sm"
           >
-            {theme === 'light' ? '🌙' : '️'}
+            {theme === 'light' ? '🌙' : '☀️'}
           </button>
         </header>
 
-        {/* 📐 ОСНОВНОЙ КОНТЕНТ (убрал max-w, оставил px-6 для небольших отступов от края экрана) */}
+        {/* 📐 ОСНОВНОЙ КОНТЕНТ */}
         {!isScheduleFullscreen ? (
-          <div className="w-full px-6 flex flex-col lg:flex-row gap-6">
+          <div className="w-full max-w-[1600px] flex flex-col lg:flex-row gap-6">
             {/* 🕐 ЛЕВАЯ КОЛОНКА: ЧАСЫ + BellInfo */}
             <div className="w-full lg:w-[35%] flex flex-col items-center">
               <div className="w-full max-w-[500px]">
@@ -248,11 +247,11 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* 📰 БЛОК НОВОСТЕЙ (убрал px-4, чтобы был на всю ширину) */}
+        {/* 📰 БЛОК НОВОСТЕЙ */}
         {!isScheduleFullscreen && (
-          <div className="w-full mt-6">
+          <div className="w-full max-w-[1600px] px-4 mt-6">
             <div className="bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col relative group">
-              <div className="w-full h-[700px]">
+              <div className="w-full h-[750px]">
                 <NewsSlider />
               </div>
             </div>
