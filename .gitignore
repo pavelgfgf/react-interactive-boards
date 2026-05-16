@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# PocketBase database files (не коммитим!)
+*.db
+pb_data/*.db-shm
+pb_data/*.db-wal
+
+pb_migrations

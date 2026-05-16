@@ -1,18 +1,21 @@
-// src/App.tsx
 import React, { useCallback, useMemo, useState } from 'react';
 
-import type { Lesson, SearchMatchItem, ThemeType } from './data/types';
-import { SCHEDULE_DATA, BELL_SCHEDULE } from './data/data';
+// Types
+import type { SearchMatchItem, ThemeType } from './data/types';
+
+// Utils
 import { getDayFull, getDayKey, parseTime } from './utils/time';
 
-import { useBellSchedule } from './hooks/useBellSchedule';
+// Hooks
 import { useTime } from './hooks/useTime';
+import { useBellSchedule } from './hooks/useBellSchedule';
 import { useDaysOfWeek } from './hooks/useDayOfWeek';
+import { useFullSchedule } from './hooks/useLesson';
 
+// Components
 import {
   BellInfo,
   BellTable,
-  ClassTabs,
   ClockSection,
   DayTabs,
   LessonItem,
@@ -20,11 +23,49 @@ import {
   SearchBar,
 } from './components';
 
+// Импортируем NewsSlider
 import { NewsSlider } from './components/News/NewsSlider';
+
+// --- ВСТРОЕННЫЙ КОМПОНЕНТ ClassTabs ---
+// Мы определяем его прямо здесь, чтобы гарантировать совпадение типов
+interface ClassTabsProps {
+  current: string;
+  onSelect: (cls: string) => void;
+  classes: string[];
+}
+
+const ClassTabs: React.FC<ClassTabsProps> = ({ current, onSelect, classes }) => {
+  return (
+    <div className="flex flex-wrap gap-2 px-4 py-3 border-b border-slate-100 dark:border-slate-700/50 bg-slate-50/30 dark:bg-slate-800/30 overflow-x-auto">
+      {classes.map((cls) => (
+        <button
+          key={cls}
+          onClick={() => onSelect(cls)}
+          className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${
+            current === cls
+              ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 border border-blue-300 dark:border-blue-700 shadow-sm'
+              : 'bg-white text-slate-600 dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600'
+          }`}
+        >
+          {cls}
+        </button>
+      ))}
+    </div>
+  );
+};
+
+// Тип для урока из PocketBase (соответствует структуре JSON)
+interface LessonData {
+  subject: string;
+  teacher: string;
+  room: string;
+}
 
 const App: React.FC = () => {
   const [theme, setTheme] = useState<ThemeType>('light');
-  const [selectedClass, setSelectedClass] = useState<string>("11А");
+  
+  // Состояния выбора
+  const [selectedClass, setSelectedClass] = useState<string>(""); 
   const [selectedDay, setSelectedDay] = useState<string>(getDayKey(new Date()));
   const [search, setSearch] = useState<string>("");
   const [isScheduleFullscreen, setIsScheduleFullscreen] = useState(false);
@@ -32,15 +73,32 @@ const App: React.FC = () => {
   const now = useTime();
   const curMin = now.getHours() * 60 + now.getMinutes();
   const todayKey = getDayKey(now);
-  const { days: daysOfWeek } = useDaysOfWeek();
 
-  const { schedule: bellSchedulePB, loading: isScheduleLoading, error: scheduleError } = useBellSchedule();
-  const bellSchedule = bellSchedulePB.length > 0 ? bellSchedulePB : BELL_SCHEDULE;
+  // --- ЗАГРУЗКА ДАННЫХ ИЗ POCKETBASE ---
+  const { schedule: bellSchedule, loading: isBellLoading, error: bellError } = useBellSchedule();
+  const { days: daysOfWeek, loading: isDaysLoading, error: daysError } = useDaysOfWeek();
+  const { schedule: fullSchedule, loading: isScheduleLoading, error: scheduleError } = useFullSchedule();
 
+  // --- ЛОГИКА ВЫБОРА КЛАССА ---
+  const availableClasses = useMemo(() => {
+    if (!fullSchedule) return [];
+    // Сортируем классы: сначала по длине (чтобы 5А был перед 10А), потом по алфавиту
+    return Object.keys(fullSchedule).sort((a, b) => {
+      if (a.length !== b.length) return a.length - b.length;
+      return a.localeCompare(b);
+    });
+  }, [fullSchedule]);
+
+  // Автоматический выбор первого класса при загрузке данных
+  if (!selectedClass && availableClasses.length > 0) {
+      setSelectedClass(availableClasses[0]);
+  }
+
+  // --- ЛОГИКА ОПРЕДЕЛЕНИЯ АКТИВНОГО УРОКА ---
   const { activeIdx, nextIdx } = useMemo(() => {
     let active = -1;
     let next = -1;
-
+    
     if (!bellSchedule || bellSchedule.length === 0) {
         return { activeIdx: -1, nextIdx: -1 };
     }
@@ -59,14 +117,21 @@ const App: React.FC = () => {
     return { activeIdx: active, nextIdx: next };
   }, [curMin, bellSchedule]);
 
+  // --- ПОЛУЧЕНИЕ ТЕКУЩИХ УРОКОВ ---
+  const currentLessons: LessonData[] = useMemo(() => {
+    if (!fullSchedule || !selectedClass || !selectedDay) return [];
+    return fullSchedule[selectedClass]?.[selectedDay] || [];
+  }, [fullSchedule, selectedClass, selectedDay]);
+
+  // --- ПОИСК ---
   const searchResults: SearchMatchItem[] = useMemo(() => {
-    if (!search) return [];
+    if (!search || !fullSchedule) return [];
     const q = search.toLowerCase();
     const results: SearchMatchItem[] = [];
     
-    Object.entries(SCHEDULE_DATA).forEach(([group, days]) => {
+    Object.entries(fullSchedule).forEach(([group, days]) => {
       Object.entries(days).forEach(([day, lessons]) => {
-        lessons.forEach((lesson, idx) => {
+        lessons.forEach((lesson: LessonData, idx: number) => {
           if (lesson.teacher.toLowerCase().includes(q) || lesson.subject.toLowerCase().includes(q)) {
             const bell = bellSchedule[idx];
             results.push({
@@ -82,10 +147,9 @@ const App: React.FC = () => {
       });
     });
     return results;
-  }, [search, bellSchedule]);
+  }, [search, fullSchedule, bellSchedule]);
 
-  const currentLessons: Lesson[] = SCHEDULE_DATA[selectedClass]?.[selectedDay] || [];
-
+  // --- ЛОГИКА СОСТОЯНИЯ УРОКА ---
   const getLessonState = useCallback((index: number) => {
     if (selectedDay === todayKey) {
       if (activeIdx === index) return 'active';
@@ -98,19 +162,52 @@ const App: React.FC = () => {
     return 'normal';
   }, [selectedDay, todayKey, activeIdx, nextIdx, curMin, bellSchedule]);
 
+  // --- ОБРАБОТЧИКИ ---
   const toggleTheme = useCallback(() => setTheme(prev => prev === 'light' ? 'dark' : 'light'), []);
-  const handleSelectClass = useCallback((cls: string) => { setSelectedClass(cls); setSearch(""); }, []);
-  const handleSelectDay = useCallback((day: string) => { setSelectedDay(day); setSearch(""); }, []);
+  
+  const handleSelectClass = useCallback((cls: string) => { 
+      setSelectedClass(cls); 
+      setSearch(""); 
+  }, []);
+  
+  const handleSelectDay = useCallback((day: string) => { 
+      setSelectedDay(day); 
+      setSearch(""); 
+  }, []);
+
   const toggleScheduleFullscreen = useCallback(() => setIsScheduleFullscreen(prev => !prev), []);
 
   const selectedDayFull = getDayFull(selectedDay);
 
-  if (isScheduleLoading) {
-      return <div className="min-h-screen flex items-center justify-center">Загрузка расписания...</div>;
+  // --- ЭКРАН ЗАГРУЗКИ И ОШИБОК ---
+  if (isBellLoading || isDaysLoading || isScheduleLoading) {
+      return (
+          <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+              <div className="text-2xl font-bold mb-4 animate-pulse">Загрузка данных...</div>
+              <div className="text-sm text-slate-500">Подключение к PocketBase</div>
+          </div>
+      );
   }
 
-  if (scheduleError) {
-      return <div className="min-h-screen flex items-center justify-center text-red-500">{scheduleError}</div>;
+  if (bellError || daysError || scheduleError) {
+      return (
+          <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-red-500 p-4 text-center">
+              <h2 className="text-2xl font-bold mb-2">Ошибка загрузки данных</h2>
+              <p>{bellError || daysError || scheduleError}</p>
+              <p className="mt-4 text-slate-500 text-sm">
+                  Проверьте консоль браузера и настройки PocketBase (API Rules).
+              </p>
+          </div>
+      );
+  }
+
+  if (availableClasses.length === 0) {
+      return (
+          <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+              <div className="text-2xl font-bold mb-4">Нет данных</div>
+              <p className="text-slate-500">Добавьте расписание в коллекцию full_schedule в PocketBase.</p>
+          </div>
+      );
   }
 
   return (
@@ -169,8 +266,21 @@ const App: React.FC = () => {
 
               <div className="flex flex-col">
                 <BellTable now={now} schedule={bellSchedule} />
-                <ClassTabs current={selectedClass} onSelect={handleSelectClass} />
-                <DayTabs current={selectedDay} today={todayKey} onSelect={handleSelectDay} days={daysOfWeek} />
+                
+                {/* Используем наш встроенный ClassTabs с правильными пропами */}
+                <ClassTabs 
+                    current={selectedClass} 
+                    onSelect={handleSelectClass} 
+                    classes={availableClasses} 
+                />
+                
+                <DayTabs 
+                    current={selectedDay} 
+                    today={todayKey} 
+                    onSelect={handleSelectDay} 
+                    days={daysOfWeek} 
+                />
+                
                 <SearchBar value={search} onChange={setSearch} onClear={() => setSearch("")} />
               </div>
 
@@ -204,8 +314,20 @@ const App: React.FC = () => {
 
                 <div className="flex flex-col flex-1 overflow-hidden">
                   <BellTable now={now} schedule={bellSchedule} />
-                  <ClassTabs current={selectedClass} onSelect={handleSelectClass} />
-                  <DayTabs current={selectedDay} today={todayKey} onSelect={handleSelectDay} days={daysOfWeek} />
+                  
+                  <ClassTabs 
+                      current={selectedClass} 
+                      onSelect={handleSelectClass} 
+                      classes={availableClasses} 
+                  />
+                  
+                  <DayTabs 
+                      current={selectedDay} 
+                      today={todayKey} 
+                      onSelect={handleSelectDay} 
+                      days={daysOfWeek} 
+                  />
+                  
                   <SearchBar value={search} onChange={setSearch} onClear={() => setSearch("")} />
 
                   {search && searchResults.length > 0 && (

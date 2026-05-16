@@ -24,6 +24,40 @@ export interface DayOfWeek {
   order_num: number; // Порядок сортировки (1, 2, 3...)
 }
 
+
+export interface ClassScheduleRecord {
+  id: string;
+  group: string; 
+  data: {    // ИСПРАВЛЕНО: было schedule_data, стало data (как в вашей БД)
+    [dayKey: string]: Array<{
+      subject: string;
+      teacher: string;
+      room: string;
+    }>;
+  };
+}
+
+/**
+ * Получает расписание для ВСЕХ групп из коллекции lesson_schedule.
+ */
+export const getAllClassSchedules = async (): Promise<ClassScheduleRecord[]> => {
+  try {
+    const records = await pb.collection('lesson_schedule').getFullList({
+      sort: 'group', 
+    });
+    return records as unknown as ClassScheduleRecord[];
+  } catch (error: any) {
+    // Добавлена защита от ошибки сортировки, если поле group отсутствует или недоступно
+    if (error.status === 400 && error.message.includes('sort')) {
+       console.warn(`Поле сортировки 'group' не найдено. Загрузка без сортировки.`);
+       const records = await pb.collection('lesson_schedule').getFullList();
+       return records as unknown as ClassScheduleRecord[];
+    }
+    console.error('Ошибка загрузки расписаний групп:', error);
+    throw error;
+  }
+};
+
 // 3. Функции для получения данных
 
 /**
