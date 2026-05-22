@@ -1,6 +1,5 @@
 // src/components/index.ts
-export { PhotoGallery } from './gallery/PhotoGallery';
-export { BellInfo } from './info/BellStatus';
+export { BellInfo } from './info/BellInfo';
 export { ClockSection } from './info/ClockSection';
 export { BellTable } from './schedule/BellTable';
 export { ClassTabs } from './schedule/ClassTabs';

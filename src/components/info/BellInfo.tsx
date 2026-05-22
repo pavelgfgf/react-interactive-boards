@@ -51,7 +51,7 @@ export const BellInfo: FC<BellInfoProps> = ({ activeIdx, nextIdx, now, schedule 
       </div>
     );
   }
-  return <div className="mt-3 text-slate-400 font-medium">Занятия на сегодня завершены</div>;
+  return <div className="text-slate-400 font-medium text-center">Занятия на сегодня завершены</div>;
 };
 
 export default BellInfo;
