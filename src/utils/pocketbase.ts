@@ -1,5 +1,5 @@
 // src/lib/pocketbase.ts
-import PocketBase from 'pocketbase';
+import PocketBase, { ClientResponseError } from 'pocketbase';
 
 // 1. Инициализация клиента
 // Используем переменную окружения для гибкости, или хардкодим для разработки
@@ -35,6 +35,18 @@ export interface ClassScheduleRecord {
       room: string;
     }>;
   };
+}
+
+export interface SpecialtyRecord {
+  id: string;
+  collectionId: string;
+  collectionName: string;
+  code: string;
+  name: string;
+  description: string;
+  photo?: string | string[];
+  image?: string | string[];
+  picture?: string | string[];
 }
 
 /**
@@ -93,3 +105,32 @@ export const getDaysOfWeek = async (): Promise<DayOfWeek[]> => {
 // Сюда можно добавлять новые функции для других коллекций, например:
 // export const getNews = async () => { ... }
 // export const getScheduleForClass = async (className: string) => { ... }
+
+export const getSpecialties = async (): Promise<SpecialtyRecord[]> => {
+  try {
+    const records = await pb.collection('specialties').getFullList({
+      sort: 'order_num,code',
+    });
+    return records as unknown as SpecialtyRecord[];
+  } catch (error: unknown) {
+    if (error instanceof ClientResponseError && error.status === 400) {
+      try {
+        const records = await pb.collection('specialties').getFullList({
+          sort: 'code',
+        });
+        return records as unknown as SpecialtyRecord[];
+      } catch (fallbackError: unknown) {
+        if (fallbackError instanceof ClientResponseError && fallbackError.status === 400) {
+          const records = await pb.collection('specialties').getFullList();
+          return records as unknown as SpecialtyRecord[];
+        }
+
+        console.error('Ошибка загрузки специальностей из PocketBase:', fallbackError);
+        throw fallbackError;
+      }
+    }
+
+    console.error('Ошибка загрузки специальностей из PocketBase:', error);
+    throw error;
+  }
+};
