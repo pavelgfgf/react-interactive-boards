@@ -4,6 +4,7 @@ import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 // Импорт страниц
 import Header from './components/Header';
+import { NewsSlider } from './components/News/NewsSlider';
 import AboutScreen from './pages/AboutScreen';
 import ApplicantsScreen from './pages/ApplicantsScreen';
 import ContactsScreen from './pages/ContactsScreen';
@@ -15,7 +16,10 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const timerRef = useRef<any>(null);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+  });
+  const isHomePage = location.pathname === '/';
 
   // Таймер неактивности (90 сек)
   const resetTimer = useCallback(() => {
@@ -37,6 +41,10 @@ function App() {
     };
   }, [resetTimer]);
 
+  useEffect(() => {
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   return (
@@ -56,6 +64,14 @@ function App() {
             <Route path="/applicants" element={<ApplicantsScreen />} />
             <Route path="/contacts" element={<ContactsScreen />} />
           </Routes>
+
+          <div className={isHomePage ? 'w-full pb-12' : 'hidden'}>
+            <div className="bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
+              <div className="w-full h-[800px]">
+                <NewsSlider />
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>

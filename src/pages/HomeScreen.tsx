@@ -5,12 +5,11 @@ import { Building2, GraduationCap, Calendar, Users, Phone } from 'lucide-react';
 // --- ИМПОРТЫ ИЗ ВАШЕГО ПРОЕКТА ---
 import { ClockSection } from '../components/info/ClockSection';
 import { BellInfo } from '../components/info/BellInfo';
-import { NewsSlider } from '../components/News/NewsSlider';
 import { useTime } from '../hooks/useTime';
 import { useBellSchedule } from '../hooks/useBellSchedule';
 
 const navigationCards = [
-  { id: 'about', icon: Building2, title: 'О колледже', desc: 'История, миссия', path: '/about' },
+  { id: 'about', icon: Building2, title: 'О колледже', desc: 'История, цель', path: '/about' },
   { id: 'specialties', icon: GraduationCap, title: 'Специальности', desc: 'Направления', path: '/specialties' },
   { id: 'schedule', icon: Calendar, title: 'Расписание', desc: 'Занятия', path: '/schedule' },
   { id: 'applicants', icon: Users, title: 'Поступающим', desc: 'Документы', path: '/applicants' },
@@ -47,7 +46,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <div className="flex flex-col items-center w-full pb-12 mx-auto">
+    <div className="flex flex-col items-center w-full mx-auto">
       
       {/* --- ВЕРХНИЙ БЛОК: ЧАСЫ + НАВИГАЦИЯ --- */}
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
@@ -93,16 +92,6 @@ export default function HomeScreen() {
           </div>
         </div>
       </div>
-
-      {/* --- НИЖНИЙ БЛОК: НОВОСТИ --- */}
-      <div className="w-full">
-        <div className="bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
-          <div className="w-full h-[800px]">
-            <NewsSlider />
-          </div>
-        </div>
-      </div>
-
     </div>
   );
 }

@@ -27,7 +27,7 @@
 
 /* Текстовая секция — фиксированная ширина, но адаптивная */
 .slider-text-section {
-    flex: 0 0 30%; /* Ширина текстовой колонки (45% от блока новостей) */
+    flex: 0 0 34%; /* Ширина текстовой колонки */
     padding: 4rem; /* Большие отступы для воздуха */
     display: flex;
     flex-direction: column;
@@ -118,8 +118,8 @@
 }
 
 .slider-text {
-    font-size: 1.5rem; 
-    line-height: 1.6;
+    font-size: 1.25rem; 
+    line-height: 1.5;
     color: rgba(255, 255, 255, 0.9);
     font-weight: 400;
     white-space: pre-wrap;
@@ -214,16 +214,16 @@
 /* Навигация по фото */
 .image-nav {
     position: absolute;
-    bottom: 3rem;
+    bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1.2rem;
     z-index: 10;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
-    padding: 1rem 2rem;
+    padding: 0.6rem 1.2rem;
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -232,7 +232,7 @@
     background: none;
     border: none;
     color: white;
-    font-size: 2.5rem; /* Крупные стрелки */
+    font-size: 1.8rem; /* Кнопки переключения фото */
     cursor: pointer;
     opacity: 0.8;
     transition: all 0.2s ease;
@@ -246,7 +246,7 @@
 
 .img-counter {
     color: white;
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 600;
     min-width: 4rem;
     text-align: center;
@@ -281,7 +281,7 @@
 /* Адаптивность для мобильных */
 @media (max-width: 1024px) {
     .slider-text-section {
-        flex: 0 0 50%;
+        flex: 0 0 54%;
         padding: 2rem;
     }
     
@@ -290,7 +290,7 @@
     }
 
     .slider-text {
-        font-size: 1.2rem;
+        font-size: 1.05rem;
     }
 }
 
@@ -369,8 +369,9 @@
 /* Кнопка закрытия */
 .fullscreen-close-btn {
     position: absolute;
-    top: 20px;
+    bottom: 2rem;
     right: 20px;
+    top: auto;
     background: rgba(0, 0, 0, 0.2);
     border: none;
     color: white;
@@ -486,7 +487,7 @@
     }
 
     .slider-container.full-screen-mode .slider-text {
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
 
     .fullscreen-controls {
