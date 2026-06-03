@@ -116,7 +116,7 @@ export default function AboutScreen() {
 
           <div className="flex-[35]">
             <div className="bg-[#F3F4F6] dark:bg-slate-800 rounded-lg flex items-center justify-center" style={{ height: '360px' }}>
-              <img src="/home.png" className="text-[#9CA3AF] dark:text-slate-500" />
+              <img src="https://pavelgfgf.github.io/react-interactive-boards/home.png" className="text-[#9CA3AF] dark:text-slate-500" />
             </div>
 
             <div className="mt-6 bg-[#E8F4F1] dark:bg-[#449284]/20 rounded-lg p-6 border-l-4 border-[#449284] dark:border-[#5fb5a8]">

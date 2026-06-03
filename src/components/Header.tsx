@@ -10,7 +10,7 @@ export default function Header({ onToggleTheme, theme }: HeaderProps) {
     <header className="w-full max-w-[1600px] px-6 lg:px-12 flex justify-between items-center mb-4 mx-auto box-border">
       <div className="flex items-center gap-3">
         <img
-          src="/logo.png"
+          src="https://pavelgfgf.github.io/react-interactive-boards/logo.png"
           alt="Логотип колледжа"
           className="w-14 h-14 rounded-xl object-contain"
         />
