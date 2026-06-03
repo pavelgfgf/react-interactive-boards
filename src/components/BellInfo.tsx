@@ -1,6 +1,6 @@
-import { type FC } from 'react';
 import { Bell, BookOpen, CheckCircle2, Coffee, Hourglass } from 'lucide-react';
-import { parseTime } from '../../utils/time';
+import { type FC } from 'react';
+import { parseTime } from '../utils/time';
 
 interface BellScheduleItem {
   num: number;
@@ -35,7 +35,7 @@ export const BellInfo: FC<BellInfoProps> = ({ activeIdx, nextIdx, now, schedule 
           <Bell size={20} className="text-slate-500 dark:text-slate-400" />
           <span>Звонок с урока: {bell.end}</span>
         </div>
-        <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-500 text-blue-600 dark:text-blue-400 px-6 py-2 rounded-lg text-base font-semibold">
+        <div className="inline-flex items-center gap-2 bg-[#E8F4F1] dark:bg-[#449284]/20 border border-[#449284] text-[#449284] dark:text-[#5fb5a8] px-6 py-2 rounded-lg text-base font-semibold">
           <BookOpen size={20} />
           <span>Урок №{bell.num} · {bell.start} - {bell.end} · осталось {formatDiff(minutesLeft)}</span>
         </div>

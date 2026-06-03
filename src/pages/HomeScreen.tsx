@@ -1,12 +1,12 @@
 // src/pages/HomeScreen.tsx
+import { Building2, Calendar, GraduationCap, Phone, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, GraduationCap, Calendar, Users, Phone } from 'lucide-react';
 
 // --- ИМПОРТЫ ИЗ ВАШЕГО ПРОЕКТА ---
-import { ClockSection } from '../components/info/ClockSection';
-import { BellInfo } from '../components/info/BellInfo';
-import { useTime } from '../hooks/useTime';
+import { BellInfo } from '../components/BellInfo';
+import { ClockSection } from '../components/ClockSection';
 import { useBellSchedule } from '../hooks/useBellSchedule';
+import { useTime } from '../hooks/useTime';
 
 const navigationCards = [
   { id: 'about', icon: Building2, title: 'О колледже', desc: 'История, цель', path: '/about' },
@@ -79,9 +79,9 @@ export default function HomeScreen() {
                 <button
                   key={card.id}
                   onClick={() => navigate(card.path)}
-                  className="flex flex-col items-center justify-center p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 group h-full"
+                  className="flex flex-col items-center justify-center p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-[#7dc6ba] dark:hover:border-[#449284] transition-all duration-200 group h-full"
                 >
-                  <div className="text-blue-600 dark:text-blue-400 text-3xl mb-2 group-hover:scale-110 transition-transform">
+                  <div className="text-[#449284] dark:text-[#5fb5a8] text-3xl mb-2 group-hover:scale-110 transition-transform">
                     <Icon size={40} />
                   </div>
                   <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg mb-1 text-center">{card.title}</h3>

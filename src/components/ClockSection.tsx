@@ -15,8 +15,8 @@ export const ClockSection: FC<ClockSectionProps> = ({ now }) => {
 
   return (
     <section className="text-center py-1">
-      <div className="inline-block border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-12 py-3 bg-slate-50 dark:bg-slate-800 shadow-lg shadow-blue-500/10 backdrop-blur-sm relative">
-        <div className="absolute top-0 left-10 right-10 h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+      <div className="inline-block border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-12 py-3 bg-slate-50 dark:bg-slate-800 shadow-lg shadow-[#449284]/10 backdrop-blur-sm relative">
+        <div className="absolute top-0 left-10 right-10 h-[1px] bg-gradient-to-r from-transparent via-[#449284] to-transparent"></div>
         <div className="text-8xl font-black tracking-widest leading-none text-slate-800 dark:text-slate-100 font-mono tabular-nums">
           {hours}<span className="animate-blink opacity-60">:</span>{minutes}
         </div>

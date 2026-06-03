@@ -9,11 +9,13 @@ export default function Header({ onToggleTheme, theme }: HeaderProps) {
   return (
     <header className="w-full max-w-[1600px] px-6 lg:px-12 flex justify-between items-center mb-4 mx-auto box-border">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xl shadow-lg shadow-blue-500/30">
-          🎓
-        </div>
+        <img
+          src="/logo.png"
+          alt="Логотип колледжа"
+          className="w-14 h-14 rounded-xl object-contain"
+        />
         <div>
-          <h1 className="text-lg font-black tracking-tight leading-tight text-slate-800 dark:text-slate-100">
+          <h1 className="text-lg font-black tracking-tight leading-tight text-slate-900 dark:text-slate-100">
             ГАПОУ КК "Ленинградский социально-педагогический колледж"
           </h1>
           <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">

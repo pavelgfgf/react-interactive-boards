@@ -15,6 +15,7 @@ import SpecialtiesScreen from './pages/SpecialtiesScreen';
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const timerRef = useRef<any>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';

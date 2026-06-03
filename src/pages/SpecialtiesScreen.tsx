@@ -71,7 +71,7 @@ export default function SpecialtiesScreen() {
   return (
     <div className="flex-1 bg-white dark:bg-slate-900 min-h-full relative">
       <div className="px-12 py-8">
-        <h2 className="font-bold text-[#0D69AF] mb-1 pb-2 border-b-2 border-[#0D69AF] inline-block" style={{ fontSize: '32px' }}>
+        <h2 className="font-bold text-[#449284] mb-1 pb-2 border-b-2 border-[#449284] inline-block" style={{ fontSize: '32px' }}>
           Специальности колледжа
         </h2>
 
@@ -97,7 +97,7 @@ export default function SpecialtiesScreen() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-12">
             {specialties.map((specialty) => (
               <div key={specialty.id} className="bg-white dark:bg-slate-800 rounded-lg border border-[#E5E7EB] dark:border-slate-700 overflow-hidden">
-                <div className="h-[180px] bg-[#EAF4FB] dark:bg-blue-900/20 flex items-center justify-center relative overflow-hidden">
+                <div className="h-[180px] bg-[#E8F4F1] dark:bg-[#449284]/20 flex items-center justify-center relative overflow-hidden">
                   {getSpecialtyPhotoUrl(specialty) ? (
                     <img
                       src={getSpecialtyPhotoUrl(specialty) || ''}
@@ -105,11 +105,11 @@ export default function SpecialtiesScreen() {
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="absolute inset-0 bg-[#EAF4FB] dark:bg-blue-900/20" />
+                    <div className="absolute inset-0 bg-[#E8F4F1] dark:bg-[#449284]/20" />
                   )}
                 </div>
                 <div className="p-6">
-                  <div className="inline-flex bg-[#0D69AF] text-white px-4 py-1.5 rounded-lg font-bold mb-4" style={{ fontSize: '16px' }}>
+                  <div className="inline-flex bg-[#449284] text-white px-4 py-1.5 rounded-lg font-bold mb-4" style={{ fontSize: '16px' }}>
                     {specialty.code}
                   </div>
                   <h3 className="font-bold mb-3 text-slate-900 dark:text-slate-100" style={{ fontSize: '20px' }}>
@@ -118,7 +118,7 @@ export default function SpecialtiesScreen() {
                   <p className="text-[#6B7280] dark:text-slate-400 mb-6 leading-relaxed" style={{ fontSize: '15px' }}>
                     {specialty.description}
                   </p>
-                  <button className="w-full h-[50px] border-2 border-[#0D69AF] text-[#0D69AF] rounded-lg font-bold hover:bg-[#EAF4FB] dark:hover:bg-blue-900/20 transition-colors" style={{ fontSize: '16px' }}>
+                  <button className="w-full h-[50px] border-2 border-[#449284] text-[#449284] rounded-lg font-bold hover:bg-[#E8F4F1] dark:hover:bg-[#449284]/20 transition-colors" style={{ fontSize: '16px' }}>
                     Подробнее
                   </button>
                 </div>

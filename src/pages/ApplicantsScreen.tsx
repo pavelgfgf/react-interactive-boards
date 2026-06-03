@@ -1,19 +1,19 @@
-import { FileText, Calendar, Phone } from 'lucide-react';
+import { Calendar, FileText, Phone } from 'lucide-react';
 import BackButton from './BackButton';
 
 export default function ApplicantsScreen() {
   return (
     <div className="flex-1 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors">
       <div className="px-12 py-8">
-        <h2 className="font-bold text-[#0D69AF] dark:text-blue-400 mb-1 pb-2 border-b-2 border-[#0D69AF] dark:border-blue-400 inline-block" style={{ fontSize: '32px' }}>
+        <h2 className="font-bold text-[#449284] dark:text-[#5fb5a8] mb-1 pb-2 border-b-2 border-[#449284] dark:border-[#5fb5a8] inline-block" style={{ fontSize: '32px' }}>
           Поступающим
         </h2>
 
         <div className="flex gap-8 mt-12">
           <div className="flex-[60] space-y-6">
-            <div className="bg-white dark:bg-slate-800 rounded-lg border-l-4 border-[#0D69AF] dark:border-l-blue-400 border border-[#E5E7EB] dark:border-slate-700 p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border-l-4 border-[#449284] dark:border-l-[#5fb5a8] border border-[#E5E7EB] dark:border-slate-700 p-6">
               <div className="flex items-start gap-4 mb-4">
-                <FileText size={32} className="text-[#0D69AF] dark:text-blue-400" />
+                <FileText size={32} className="text-[#449284] dark:text-[#5fb5a8]" />
                 <h3 className="font-bold" style={{ fontSize: '22px' }}>Документы для поступления</h3>
               </div>
               <ul className="space-y-2 text-[#6B7280] dark:text-slate-400 ml-12" style={{ fontSize: '16px' }}>
@@ -25,9 +25,9 @@ export default function ApplicantsScreen() {
               </ul>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-lg border-l-4 border-[#0D69AF] dark:border-l-blue-400 border border-[#E5E7EB] dark:border-slate-700 p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border-l-4 border-[#449284] dark:border-l-[#5fb5a8] border border-[#E5E7EB] dark:border-slate-700 p-6">
               <div className="flex items-start gap-4 mb-4">
-                <Calendar size={32} className="text-[#0D69AF] dark:text-blue-400" />
+                <Calendar size={32} className="text-[#449284] dark:text-[#5fb5a8]" />
                 <h3 className="font-bold" style={{ fontSize: '22px' }}>Сроки приёма</h3>
               </div>
               <div className="ml-12 space-y-2">
@@ -43,9 +43,9 @@ export default function ApplicantsScreen() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-lg border-l-4 border-[#0D69AF] dark:border-l-blue-400 border border-[#E5E7EB] dark:border-slate-700 p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border-l-4 border-[#449284] dark:border-l-[#5fb5a8] border border-[#E5E7EB] dark:border-slate-700 p-6">
               <div className="flex items-start gap-4 mb-4">
-                <Phone size={32} className="text-[#0D69AF] dark:text-blue-400" />
+                <Phone size={32} className="text-[#449284] dark:text-[#5fb5a8]" />
                 <h3 className="font-bold" style={{ fontSize: '22px' }}>Приёмная комиссия</h3>
               </div>
               <div className="ml-12 space-y-2">
@@ -66,19 +66,19 @@ export default function ApplicantsScreen() {
           </div>
 
           <div className="flex-[40]">
-            <div className="bg-[#EAF4FB] dark:bg-blue-900/20 rounded-lg p-8 flex flex-col items-center justify-center border border-transparent dark:border-blue-900/40" style={{ height: '600px' }}>
-              <h3 className="font-bold text-center mb-8 text-[#0D69AF] dark:text-blue-400" style={{ fontSize: '28px' }}>
+            <div className="bg-[#E8F4F1] dark:bg-[#449284]/20 rounded-lg p-8 flex flex-col items-center justify-center border border-transparent dark:border-[#449284]/40" style={{ height: '600px' }}>
+              <h3 className="font-bold text-center mb-8 text-[#449284] dark:text-[#5fb5a8]" style={{ fontSize: '28px' }}>
                 Готовы поступить?
               </h3>
-              <button className="w-full h-[80px] bg-[#0D69AF] text-white rounded-lg font-bold mb-6 hover:bg-[#0A5590] transition-colors" style={{ fontSize: '20px' }}>
+              <button className="w-full h-[80px] bg-[#449284] text-white rounded-lg font-bold mb-6 hover:bg-[#36766a] transition-colors" style={{ fontSize: '20px' }}>
                 Записаться в колледж
               </button>
               <a
-                href="#"
-                className="text-[#0D69AF] dark:text-blue-400 hover:underline text-center"
+                href="https://lspk31.gosuslugi.ru/"
+                className="text-[#449284] dark:text-[#5fb5a8] hover:underline text-center"
                 style={{ fontSize: '16px' }}
               >
-                Узнать подробнее на gosuslugi.ru
+                Узнать подробнее на официальном сайте колледжа
               </a>
             </div>
           </div>
